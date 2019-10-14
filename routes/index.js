@@ -19,7 +19,7 @@ const checkToken = (req, res, next) => {
 
 /* GET user profile. */
 router.get("/me", checkToken, function(req, res, next) {
-  res.send(req.user);
+  res.json(req.user);
 });
 
 module.exports = router;
