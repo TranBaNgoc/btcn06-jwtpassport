@@ -43,7 +43,11 @@ router.post("/register", function(req, res, next) {
 
 router.get("/test", function(req, res, next) {
     console.log("test ok");
-    res.json({me: "ok"})
+
+    UserModels.add({username: "123", password: "123123"}).then(() => {
+        res.json({me: "ok"})
+    })
+    
 })
 
 module.exports = router;
