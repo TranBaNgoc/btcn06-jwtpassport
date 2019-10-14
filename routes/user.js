@@ -43,6 +43,7 @@ router.post("/register", function(req, res, next) {
 
 router.get("/test", function(req, res, next) {
     console.log("test ok");
+    res.json({me: "ok"})
 })
 
 module.exports = router;
