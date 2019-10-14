@@ -4,26 +4,25 @@ const passport = require("passport");
 var router = express.Router();
 var UserModels = require("../models/users.model");
 
-
 /* POST login. */
 router.post("/login", function(req, res, next) {
-    passport.authenticate("local", { session: false }, (err, user, info) => {
-      if (err !== null || !user) {
-        return res.status(400).json({
-          message: "Login failed",
-          user: user
-        });
-      }
-      req.login(user, { session: false }, err => {
-        if (err) {
-          res.send(err);
-        }
-  
-        const token = jwt.sign(JSON.stringify(user), "your_jwt_secret");
-        return res.json({user, token});
+  passport.authenticate("local", { session: false }, (err, user, info) => {
+    if (err !== null || !user) {
+      return res.status(400).json({
+        message: "Login failed",
+        user: user
       });
-    })(req, res);
-  });
+    }
+    req.login(user, { session: false }, err => {
+      if (err) {
+        res.send(err);
+      }
+
+      const token = jwt.sign(JSON.stringify(user), "your_jwt_secret");
+      return res.json({ user, token });
+    });
+  })(req, res);
+});
 
 router.post("/register", function(req, res, next) {
   var entity = {
@@ -32,14 +31,14 @@ router.post("/register", function(req, res, next) {
   };
 
   UserModels.single(entity.username).then(row => {
-      if (row.length === 0) {
-          UserModels.add(entity).then(username => {
-              res.json({message: "Đăng ký thành công", username: username});
-          })
-      } else {
-          res.json({message: "Đăng ký thất bại, tài khoản đã tồn tại"});
-      }
-  })
+    if (row.length === 0) {
+      UserModels.add(entity).then(username => {
+        res.json({ message: "Đăng ký thành công", username: username });
+      });
+    } else {
+      res.json({ message: "Đăng ký thất bại, tài khoản đã tồn tại" });
+    }
+  });
 });
 
 module.exports = router;
