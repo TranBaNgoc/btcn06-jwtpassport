@@ -27,7 +27,8 @@ router.post("/login", function(req, res, next) {
 router.post("/register", function(req, res, next) {
   var entity = {
     username: req.body.username,
-    password: req.body.password
+    password: req.body.password,
+    displayname: req.body.displayname
   };
 
   UserModels.single(entity.username).then(row => {
