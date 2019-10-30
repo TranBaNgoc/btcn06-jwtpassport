@@ -9,17 +9,18 @@ router.post("/login", function(req, res, next) {
   passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err !== null || !user) {
       return res.status(400).json({
-        message: "Đăng nhập thất bại",
+        error: "Đăng nhập thất bại",
         user: user
       });
     }
     req.login(user, { session: false }, err => {
       if (err) {
-        res.send(err);
+        res.status(400).send(err);
       }
 
-      const token = jwt.sign(JSON.stringify(user), "your_jwt_secret");
-      return res.json({ user, token, message: "Đăng nhập thành công" });
+      var entity = { username: user.username, displayname: user.displayname };
+      const token = jwt.sign(JSON.stringify(entity), "your_jwt_secret");
+      return res.status(200).json({ user: entity , token});
     });
   })(req, res);
 });
@@ -33,11 +34,11 @@ router.post("/register", function(req, res, next) {
 
   UserModels.single(entity.username).then(row => {
     if (row.length === 0) {
-      UserModels.add(entity).then(username => {
-        res.json({ message: "Đăng ký thành công", username: username });
+      UserModels.add(entity).then(() => {
+        res.status(200).json({ username: entity.username });
       });
     } else {
-      res.json({ message: "Đăng ký thất bại, tài khoản đã tồn tại" });
+      res.status(400).json({ error: "Đăng ký thất bại, tài khoản đã tồn tại" });
     }
   });
 });

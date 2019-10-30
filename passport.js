@@ -18,11 +18,11 @@ passport.use(
       return UserModel.single(username)
         .then(user => {
           if (user.length === 0) {
-            return cb(null, false, { message: "Sai tài khoản hoặc mật khẩu." });
+            return cb(null, false, { error: "Sai tài khoản hoặc mật khẩu." });
           } else {
             if (user[0].password !== password) {
               return cb(null, false, {
-                message: "Sai tài khoản hoặc mật khẩu."
+                error: "Sai tài khoản hoặc mật khẩu."
               });
             } else {
               return cb(null, user[0], {
