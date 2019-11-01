@@ -51,8 +51,8 @@ router.post("/profile", function(req, res, next) {
   };
 
   UserModels.single(entity.username).then(row => {
-    if (row.length !== 0) {
-      UserModels.add(entity).then(() => {
+    if (row.length != 0) {
+      UserModels.update(entity).then(() => {
         res.status(200).json({ username: entity.username });
       });
     } else {
