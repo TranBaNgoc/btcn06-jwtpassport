@@ -43,4 +43,22 @@ router.post("/register", function(req, res, next) {
   });
 });
 
+router.post("/profile", function(req, res, next) {
+  var entity = {
+    username: req.body.username,
+    password: req.body.password,
+    displayname: req.body.displayname
+  };
+
+  UserModels.single(entity.username).then(row => {
+    if (row.length === 0) {
+      UserModels.add(entity).then(() => {
+        res.status(200).json({ username: entity.username });
+      });
+    } else {
+      res.status(400).json({ error: "Cập nhật thất bại" });
+    }
+  });
+})
+
 module.exports = router;
