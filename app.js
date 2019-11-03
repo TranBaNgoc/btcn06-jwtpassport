@@ -1,9 +1,15 @@
-var express = require("express");
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+
 var bodyParser = require("body-parser");
 const passport = require("passport");
 var user = require("./routes/user");
 var index = require("./routes/index");
 require("./passport");
+
 var app = express();
 
 var allowCrossDomain = function(req, res, next) {
@@ -27,29 +33,33 @@ app.use(allowCrossDomain);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.use("/user", user);
 app.use("/", passport.authenticate("jwt", { session: false }), index);
 
-var server = require("http").createServer(app);
-var io = require("socket.io")(server, {origins:'*:*'});
-
-io.on('connection', socket => {
-  console.log('New client connected')
-  
-  // just like on the client side, we have a socket.on method that takes a callback function
-  socket.on('AddMessage', (textMessage) => {
-    // once we get a 'change color' event from one of our clients, we will send it to the rest of the clients
-    // we make use of the socket.emit method again with the argument given to use from the callback function above
-    console.log('Message is: ', textMessage)
-    socket.broadcast.emit('AddMessage', textMessage)
-  })
-  
-  // disconnect is fired when a client leaves the server
-  socket.on('disconnect', () => {
-    console.log('user disconnected')
-  })
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
 });
 
-app.listen(process.env.PORT || 4001, function() {
-  console.log("Express is running on port ", process.env.PORT || 4001);
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
 });
+
+module.exports = app;
