@@ -28,10 +28,8 @@ const users = [];
 io.on('connection', socket => {
   console.log('New client connected')
   users.push('1');
-  console.log(roomID + "");
-
-  socket.join("" + roomID);
-
+  // socket.join("" + roomID);
+  
   if (users.length == 2) {
     user = [];
     roomID++;
@@ -42,7 +40,7 @@ io.on('connection', socket => {
     // once we get a 'change color' event from one of our clients, we will send it to the rest of the clients
     // we make use of the socket.emit method again with the argument given to use from the callback function above
     console.log('Message is: ', messageData)
-    io.sockets.to("1").emit('BroadcastMessage', messageData)
+    io.sockets.emit('BroadcastMessage', messageData)
   })
   
   socket.on('AddStep', (StepData) => {
@@ -50,6 +48,10 @@ io.on('connection', socket => {
     // we make use of the socket.emit method again with the argument given to use from the callback function above
     console.log('Message is: ', StepData)
     io.sockets.emit('BroadcastStep', StepData)
+  })
+
+  socket.on('ResetGame', username => {
+    io.sockets.emit('RequestResetGame', username);
   })
 
   // disconnect is fired when a client leaves the server

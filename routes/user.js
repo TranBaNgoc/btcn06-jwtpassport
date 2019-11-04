@@ -18,7 +18,7 @@ router.post("/login", function(req, res, next) {
         res.status(400).send(err);
       }
 
-      var entity = { username: user.username, displayname: user.displayname };
+      var entity = { username: user.username, displayname: user.displayname, avatar: user.avatar };
       const token = jwt.sign(JSON.stringify(entity), "your_jwt_secret");
       return res.status(200).json({ user: entity , token});
     });
@@ -29,7 +29,8 @@ router.post("/register", function(req, res, next) {
   var entity = {
     username: req.body.username,
     password: req.body.password,
-    displayname: req.body.displayname
+    displayname: req.body.displayname,
+    avatar: req.body.avatar
   };
 
   UserModels.single(entity.username).then(row => {
@@ -47,7 +48,8 @@ router.post("/profile", function(req, res, next) {
   var entity = {
     username: req.body.username,
     password: req.body.password,
-    displayname: req.body.displayname
+    displayname: req.body.displayname,
+    avatar: req.body.avatar
   };
 
   UserModels.single(entity.username).then(row => {
