@@ -71,7 +71,7 @@ io.on('connection', socket => {
   })
 
   socket.on('RequestSurrender', username => {
-    io.sockets.emit('AcceptSurrender', username);
+    io.sockets.emit('BroadcastSurrender', username);
   })
 
   // disconnect is fired when a client leaves the server
