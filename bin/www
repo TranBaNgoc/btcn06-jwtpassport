@@ -63,7 +63,11 @@ io.on('connection', socket => {
   })
 
   socket.on('RequestDraw', username => {
-    io.sockets.emit('AcceptDraw', username);
+    io.sockets.emit('BroadcastDraw', username);
+  })
+
+  socket.on('AcceptDraw', isAccept => {
+    io.sockets.emit('BroadcastAcceptDraw', isAccept);
   })
 
   socket.on('RequestSurrender', username => {
