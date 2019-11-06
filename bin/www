@@ -23,57 +23,143 @@ app.set('port', port);
 var server = http.createServer(app);
 var io = require("socket.io")(server, {origins:'*:*'});
 
-var roomID = 1;
-const users = [];
+var roomID = 0;
+/*
+{
+  roomID: int
+  users: [socket.id]
+}
+*/
+const rooms = [];
 io.on('connection', socket => {
   console.log('New client connected')
-  users.push('1');
-  // socket.join("" + roomID);
   
-  if (users.length == 2) {
-    user = [];
-    roomID++;
-  }
-  
+  socket.on('SearchCompetitor', data => {
+    if (typeof rooms[roomID] === 'undefined') {
+      rooms.push({
+        roomID: roomID + "",
+        users: [socket.id],
+      });
+      socket.join(rooms[roomID].roomID);
+      io.sockets.to(rooms[roomID].roomID).emit('isHaveCompetitor', false);
+    } else {
+      rooms[roomID].users.push(socket.id);
+      socket.join(rooms[roomID].roomID);
+      io.sockets.to(rooms[roomID].roomID).emit('isHaveCompetitor', true);
+      roomID++;
+
+    }
+  })
+
   // just like on the client side, we have a socket.on method that takes a callback function
   socket.on('AddMessage', (messageData) => {
     // once we get a 'change color' event from one of our clients, we will send it to the rest of the clients
     // we make use of the socket.emit method again with the argument given to use from the callback function above
-    console.log('Message is: ', messageData)
-    io.sockets.emit('BroadcastMessage', messageData)
+    let thisRoom = "";
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        break;
+      }
+    }
+    io.sockets.to(thisRoom).emit('BroadcastMessage', messageData)
   })
   
   socket.on('AddStep', (StepData) => {
     // once we get a 'change color' event from one of our clients, we will send it to the rest of the clients
     // we make use of the socket.emit method again with the argument given to use from the callback function above
     console.log('Message is: ', StepData)
-    io.sockets.emit('BroadcastStep', StepData)
+    let thisRoom = "";
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        break;
+      }
+    }
+    io.sockets.to(thisRoom).emit('BroadcastStep', StepData)
   })
 
   socket.on('ResetGame', username => {
-    io.sockets.emit('RequestResetGame', username);
+    let thisRoom = "";
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        break;
+      }
+    }
+    io.sockets.to(thisRoom).emit('RequestResetGame', username);
   })
 
   socket.on('RequestUndo', username => {
-    io.sockets.emit('BroadcastUndo', username);
+    let thisRoom = "";
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        break;
+      }
+    }
+    io.sockets.to(thisRoom).emit('BroadcastUndo', username);
   })
 
   socket.on('AcceptUndo', isAccept => {
-    io.sockets.emit('BroadcaseAcceptUndo', isAccept);
+    let thisRoom = "";
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        break;
+      }
+    }
+    io.sockets.to(thisRoom).emit('BroadcaseAcceptUndo', isAccept);
   })
 
   socket.on('RequestDraw', username => {
-    io.sockets.emit('BroadcastDraw', username);
+    let thisRoom = "";
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        break;
+      }
+    }
+    io.sockets.to(thisRoom).emit('BroadcastDraw', username);
   })
 
   socket.on('AcceptDraw', isAccept => {
-    io.sockets.emit('BroadcastAcceptDraw', isAccept);
+    let thisRoom = "";
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        break;
+      }
+    }
+    io.sockets.to(thisRoom).emit('BroadcastAcceptDraw', isAccept);
   })
 
   socket.on('RequestSurrender', username => {
-    io.sockets.emit('BroadcastSurrender', username);
+    let thisRoom = "";
+    console.log('Message is: ', socket.id)
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        break;
+      }
+    }
+    console.log(thisRoom);
+    io.sockets.to(thisRoom).emit('BroadcastSurrender', username);
   })
+  
+  socket.on('LeaveRoom', data => {
+    let thisRoom = "";
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].users.includes(socket.id)) {
+        thisRoom = rooms[i].roomID;
+        rooms[i].users = [];
+        break;
+      }
+    }
 
+    if (thisRoom != "") io.sockets.to(thisRoom).emit('CompetitorLeaveRoom', data);
+    socket.leaveAll();
+  })
   // disconnect is fired when a client leaves the server
   socket.on('disconnect', () => {
     console.log('user disconnected')

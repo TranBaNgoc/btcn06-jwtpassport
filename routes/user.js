@@ -18,9 +18,13 @@ router.post("/login", function(req, res, next) {
         res.status(400).send(err);
       }
 
-      var entity = { username: user.username, displayname: user.displayname, avatar: user.avatar };
+      var entity = {
+        username: user.username,
+        displayname: user.displayname,
+        avatar: user.avatar
+      };
       const token = jwt.sign(JSON.stringify(entity), "your_jwt_secret");
-      return res.status(200).json({ user: entity , token});
+      return res.status(200).json({ user: entity, token });
     });
   })(req, res);
 });
@@ -61,6 +65,19 @@ router.post("/profile", function(req, res, next) {
       res.status(400).json({ error: "Cập nhật thất bại" });
     }
   });
-})
+});
+
+// router.get(
+//   "/auth/facebook",
+//   passport.authenticate("facebook", { scope: ["email"] })
+// );
+// // xử lý sau khi user cho phép xác thực với facebook
+// router.get(
+//   "/auth/facebook/callback",
+//   passport.authenticate("facebook", {
+//     successRedirect: "/profile",
+//     failureRedirect: "/"
+//   })
+// );
 
 module.exports = router;
